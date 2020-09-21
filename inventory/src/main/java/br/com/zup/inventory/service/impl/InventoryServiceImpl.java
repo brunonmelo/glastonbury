@@ -2,9 +2,9 @@ package br.com.zup.inventory.service.impl;
 
 import br.com.zup.inventory.entity.InventoryItem;
 import br.com.zup.inventory.event.OrderCreatedEvent;
+import br.com.zup.inventory.event.OrderEvent;
 import br.com.zup.inventory.repository.InventoryRepository;
 import br.com.zup.inventory.service.InventoryService;
-import event.OrderEvent;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +17,9 @@ public class InventoryServiceImpl implements InventoryService {
     private final InventoryRepository repository;
     private final KafkaTemplate<String, OrderEvent> template;
 
-    public InventoryServiceImpl(InventoryRepository repository, KafkaTemplate<String, OrderEvent> template) {
+    public InventoryServiceImpl(
+            InventoryRepository repository,
+            KafkaTemplate<String, OrderEvent> template) {
         this.repository = repository;
         this.template = template;
     }
@@ -36,6 +38,7 @@ public class InventoryServiceImpl implements InventoryService {
         OrderEvent orderEvent = createOrderEvent(orderCreatedEvent, isItensValid);
 
         template.send(orderType, orderEvent);
+        System.out.println("Enviando Evento " + orderType);
     }
 
     private OrderEvent createOrderEvent(OrderCreatedEvent orderCreatedEvent, boolean isItensValid) {

@@ -2,10 +2,11 @@ package br.com.zup.order.service.impl;
 
 import br.com.zup.order.controller.request.CreateOrderRequest;
 import br.com.zup.order.controller.response.OrderResponse;
+import br.com.zup.order.entity.Order;
 import br.com.zup.order.event.OrderCreatedEvent;
+import br.com.zup.order.event.OrderEvent;
 import br.com.zup.order.repository.OrderRepository;
 import br.com.zup.order.service.OrderService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -18,8 +19,9 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final KafkaTemplate<String, OrderCreatedEvent> template;
 
-    @Autowired
-    public OrderServiceImpl(OrderRepository orderRepository, KafkaTemplate<String, OrderCreatedEvent> template) {
+    public OrderServiceImpl(
+            OrderRepository orderRepository,
+            KafkaTemplate<String, OrderCreatedEvent> template) {
         this.orderRepository = orderRepository;
         this.template = template;
     }
@@ -39,6 +41,7 @@ public class OrderServiceImpl implements OrderService {
         );
 
         this.template.send("created-orders", event);
+        System.out.println("Criando order e enviando");
 
         return orderId;
     }
@@ -49,5 +52,23 @@ public class OrderServiceImpl implements OrderService {
                 .stream()
                 .map(OrderResponse::fromEntity)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public void processFail(OrderEvent event) {
+        Order order = orderRepository
+                .findById(event.getId()).orElseThrow(() -> new RuntimeException("Id de order não localizado"));
+
+        order.setStatus("canceled");
+        orderRepository.save(order);
+    }
+
+    @Override
+    public void processSuccess(OrderEvent event) {
+        Order order = orderRepository
+                .findById(event.getId()).orElseThrow(() -> new RuntimeException("Id de order não localizado"));
+
+        order.setStatus("success");
+        orderRepository.save(order);
     }
 }

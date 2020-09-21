@@ -1,6 +1,4 @@
-package event;
-
-import br.com.zup.inventory.event.OrderCreatedEvent;
+package br.com.zup.inventory.event;
 
 import java.math.BigDecimal;
 import java.util.List;

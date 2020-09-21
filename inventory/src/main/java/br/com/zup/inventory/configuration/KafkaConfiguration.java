@@ -1,8 +1,10 @@
 package br.com.zup.inventory.configuration;
 
-import br.com.zup.inventory.client.OrderReceiverListener;
+import br.com.zup.inventory.event.OrderEvent;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,6 +12,9 @@ import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.core.DefaultKafkaProducerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.serializer.JsonSerializer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,14 +23,8 @@ import java.util.Map;
 @EnableKafka
 public class KafkaConfiguration {
 
-    private final String bootstrap;
-    private final OrderReceiverListener orderReceiverListener;
-
-    public KafkaConfiguration(@Value(value = "${spring.kafka.bootstrap-servers}") String bootstrap,
-                              OrderReceiverListener orderReceiverListener) {
-        this.bootstrap = bootstrap;
-        this.orderReceiverListener = orderReceiverListener;
-    }
+    @Value(value = "${spring.kafka.bootstrap-servers}")
+    private String bootstrap;
 
     @Bean
     public ConsumerFactory<String, String> consumerFactory() {
@@ -38,15 +37,27 @@ public class KafkaConfiguration {
     }
 
     @Bean
+    public KafkaTemplate<String, OrderEvent> messageKafkaTemplate() {
+        return new KafkaTemplate<String, OrderEvent>(messageProducerFactory());
+    }
+
+    @Bean
+    public DefaultKafkaProducerFactory messageProducerFactory() {
+
+        Map<String, Object> configProps = new HashMap<>();
+
+        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrap);
+        configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+
+        return new DefaultKafkaProducerFactory<>(configProps);
+    }
+
+    @Bean
     public ConcurrentKafkaListenerContainerFactory<String, String>
     kafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, String> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
         return factory;
-    }
-
-    @Bean
-    public OrderReceiverListener receiver() {
-        return orderReceiverListener;
     }
 }
