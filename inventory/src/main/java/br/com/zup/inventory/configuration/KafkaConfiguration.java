@@ -1,31 +1,30 @@
 package br.com.zup.inventory.configuration;
 
-import br.com.zup.inventory.event.OrderCreatedEvent;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import br.com.zup.inventory.client.OrderReceiverListener;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
+@EnableKafka
 public class KafkaConfiguration {
 
-    private String bootstrap;
-    private ObjectMapper objectMapper;
+    private final String bootstrap;
+    private final OrderReceiverListener orderReceiverListener;
 
     public KafkaConfiguration(@Value(value = "${spring.kafka.bootstrap-servers}") String bootstrap,
-                              ObjectMapper objectMapper) {
+                              OrderReceiverListener orderReceiverListener) {
         this.bootstrap = bootstrap;
-        this.objectMapper = objectMapper;
+        this.orderReceiverListener = orderReceiverListener;
     }
 
     @Bean
@@ -46,9 +45,8 @@ public class KafkaConfiguration {
         return factory;
     }
 
-    @KafkaListener(topics = "created-orders", groupId = "inventory-group-id")
-    public void listen(String message) throws IOException {
-        OrderCreatedEvent event = this.objectMapper.readValue(message, OrderCreatedEvent.class);
-        System.out.println("Received event: " + event.getCustomerId());
+    @Bean
+    public OrderReceiverListener receiver() {
+        return orderReceiverListener;
     }
 }

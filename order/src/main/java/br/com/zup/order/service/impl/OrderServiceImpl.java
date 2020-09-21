@@ -15,8 +15,8 @@ import java.util.stream.Collectors;
 @Service
 public class OrderServiceImpl implements OrderService {
 
-    private OrderRepository orderRepository;
-    private KafkaTemplate<String, OrderCreatedEvent> template;
+    private final OrderRepository orderRepository;
+    private final KafkaTemplate<String, OrderCreatedEvent> template;
 
     @Autowired
     public OrderServiceImpl(OrderRepository orderRepository, KafkaTemplate<String, OrderCreatedEvent> template) {

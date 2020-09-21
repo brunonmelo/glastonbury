@@ -1,5 +1,7 @@
 package br.com.zup.inventory.event;
 
+import br.com.zup.inventory.entity.OrderPosted;
+
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -50,5 +52,23 @@ public class OrderCreatedEvent {
 
     public void setItemIds(List<String> itemIds) {
         this.itemIds = itemIds;
+    }
+
+    public OrderPosted toEntity() {
+        return new OrderPosted(
+                this.orderId,
+                this.customerId,
+                this.amount,
+                this.itemIds);
+    }
+
+    @Override
+    public String toString() {
+        return "OrderCreatedEvent{" +
+                "orderId='" + orderId + '\'' +
+                ", customerId='" + customerId + '\'' +
+                ", amount=" + amount +
+                ", itemIds=" + itemIds +
+                '}';
     }
 }

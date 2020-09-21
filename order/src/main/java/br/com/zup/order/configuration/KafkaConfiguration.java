@@ -30,10 +30,15 @@ public class KafkaConfiguration {
         return new KafkaAdmin(configs);
     }
 
-    @Bean
-    public NewTopic message() {
-        return new NewTopic("created-orders", 1, (short) 1);
-    }
+//    @Bean
+//    public NewTopic successOrder() {
+//        return new NewTopic("inventory-order-success", 1, (short) 1);
+//    }
+//
+//    @Bean
+//    public NewTopic failOrder() {
+//        return new NewTopic("inventory-order-fail", 1, (short) 1);
+//    }
 
     @Bean
     public DefaultKafkaProducerFactory messageProducerFactory() {
