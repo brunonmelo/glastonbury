@@ -34,11 +34,7 @@ public class OrderServiceImpl implements OrderService {
                 orderId,
                 request.getCustomerId(),
                 request.getAmount(),
-                request.getItems()
-                        .stream()
-                        .map(CreateOrderRequest.OrderItemPart::getId)
-                        .collect(Collectors.toList())
-        );
+                request.getItems());
 
         this.template.send("created-orders", event);
         System.out.println("Criando order e enviando");

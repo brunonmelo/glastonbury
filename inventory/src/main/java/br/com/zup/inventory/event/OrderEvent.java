@@ -1,5 +1,7 @@
 package br.com.zup.inventory.event;
 
+import br.com.zup.inventory.entity.InventoryItem;
+
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -8,14 +10,14 @@ public class OrderEvent {
     private final String id;
     private final String customeId;
     private final BigDecimal amount;
-    private final List<String> itemIds;
+    private final List<InventoryItem> itemIds;
     private final String message;
 
     public OrderEvent(OrderCreatedEvent orderCreatedEvent, String message) {
         this.id = orderCreatedEvent.getOrderId();
         this.customeId = orderCreatedEvent.getCustomerId();
         this.amount = orderCreatedEvent.getAmount();
-        this.itemIds = orderCreatedEvent.getItemIds();
+        this.itemIds = orderCreatedEvent.getInventoryItems();
         this.message = message;
     }
 
@@ -31,7 +33,7 @@ public class OrderEvent {
         return amount;
     }
 
-    public List<String> getItemIds() {
+    public List<InventoryItem> getItemIds() {
         return itemIds;
     }
 

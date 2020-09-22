@@ -3,6 +3,9 @@ package br.com.zup.inventory.service.impl;
 import br.com.zup.inventory.entity.InventoryItem;
 import br.com.zup.inventory.event.OrderCreatedEvent;
 import br.com.zup.inventory.event.OrderEvent;
+import br.com.zup.inventory.exceptions.InventoryException;
+import br.com.zup.inventory.exceptions.ItemNotFoundException;
+import br.com.zup.inventory.exceptions.NotEnoughItemException;
 import br.com.zup.inventory.repository.InventoryRepository;
 import br.com.zup.inventory.service.InventoryService;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -26,28 +29,41 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Override
     public void processOrder(OrderCreatedEvent orderCreatedEvent) {
-        List<InventoryItem> inventoryItems = orderCreatedEvent
-                .getItemIds()
-                .stream()
-                .map((itemsId) -> repository.findById(itemsId).orElse(new InventoryItem()))
-                .collect(Collectors.toList());
+        String orderType;
+        OrderEvent orderEvent;
+        try {
+            validateEventItems(orderCreatedEvent);
 
-        boolean isItensValid = validateItems(inventoryItems);
-
-        String orderType = isItensValid ? "inventory-order-success" : "inventory-order-fail";
-        OrderEvent orderEvent = createOrderEvent(orderCreatedEvent, isItensValid);
+            orderEvent = createValidOrderEvent(orderCreatedEvent);
+            orderType = "book-order";
+        } catch (InventoryException e) {
+            orderEvent = createInvalidOrderEvent(orderCreatedEvent);
+            orderType = "inventory-order-fail";
+        }
 
         template.send(orderType, orderEvent);
         System.out.println("Enviando Evento " + orderType);
     }
 
-    private OrderEvent createOrderEvent(OrderCreatedEvent orderCreatedEvent, boolean isItensValid) {
-        String message = isItensValid ? "success" : "error on validate items inventory";
+    private OrderEvent createValidOrderEvent(OrderCreatedEvent orderCreatedEvent) {
+        String message = "success";
         return new OrderEvent(orderCreatedEvent, message);
     }
 
-    private boolean validateItems(List<InventoryItem> inventoryItems) {
+    private OrderEvent createInvalidOrderEvent(OrderCreatedEvent orderCreatedEvent) {
+        String message = "error on validate items inventory";
+        return new OrderEvent(orderCreatedEvent, message);
+    }
+
+    private void validateEventItems(OrderCreatedEvent orderCreatedEvent) {
+        List<InventoryItem> inventoryItems = orderCreatedEvent
+                .getInventoryItems()
+                .stream()
+                .map(i -> repository.findById(i.getId()).orElseThrow(() -> new ItemNotFoundException("Item not found")))
+                .collect(Collectors.toList());
+
         long value = Math.round(Math.random());
-        return value != 0;
+        boolean validated = value != 0;
+        if(!validated) throw new NotEnoughItemException("Not enough items available");
     }
 }

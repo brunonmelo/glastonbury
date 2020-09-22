@@ -22,9 +22,9 @@ public class OrderPosted {
 
     @ManyToMany(targetEntity = InventoryItem.class, fetch = FetchType.LAZY)
     @Cascade(CascadeType.ALL)
-    private List<String> items;
+    private List<InventoryItem> items;
 
-    public OrderPosted(String id, String customerId, BigDecimal amount, List<String> items) {
+    public OrderPosted(String id, String customerId, BigDecimal amount, List<InventoryItem> items) {
         this.id = id;
         this.customerId = customerId;
         this.amount = amount;
@@ -58,11 +58,11 @@ public class OrderPosted {
         this.amount = amount;
     }
 
-    public List<String> getItems() {
+    public List<InventoryItem> getItems() {
         return items;
     }
 
-    public void setItems(List<String> items) {
+    public void setItems(List<InventoryItem> items) {
         this.items = items;
     }
 

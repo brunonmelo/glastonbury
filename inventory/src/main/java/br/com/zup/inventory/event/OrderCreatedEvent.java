@@ -1,25 +1,28 @@
 package br.com.zup.inventory.event;
 
+import br.com.zup.inventory.entity.InventoryItem;
 import br.com.zup.inventory.entity.OrderPosted;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class OrderCreatedEvent {
 
     private String orderId;
     private String customerId;
     private BigDecimal amount;
-    private List<String> itemIds;
+    private Map<String, Integer> itemQuantity;
 
     public OrderCreatedEvent() {
     }
 
-    public OrderCreatedEvent(String orderId, String customerId, BigDecimal amount, List<String> itemIds) {
+    public OrderCreatedEvent(String orderId, String customerId, BigDecimal amount, Map<String, Integer> itemsQuantity) {
         this.orderId = orderId;
         this.customerId = customerId;
         this.amount = amount;
-        this.itemIds = itemIds;
+        this.itemQuantity = itemsQuantity;
     }
 
     public String getOrderId() {
@@ -46,12 +49,12 @@ public class OrderCreatedEvent {
         this.amount = amount;
     }
 
-    public List<String> getItemIds() {
-        return itemIds;
+    public List<InventoryItem> getInventoryItems() {
+        return mapsToEntities(itemQuantity);
     }
 
-    public void setItemIds(List<String> itemIds) {
-        this.itemIds = itemIds;
+    public void setItemQuantity(Map<String, Integer> itemQuantity) {
+        this.itemQuantity = itemQuantity;
     }
 
     public OrderPosted toEntity() {
@@ -59,7 +62,15 @@ public class OrderCreatedEvent {
                 this.orderId,
                 this.customerId,
                 this.amount,
-                this.itemIds);
+                mapsToEntities(this.itemQuantity));
+    }
+
+    private List<InventoryItem> mapsToEntities(Map<String, Integer> itemQuantity) {
+        return this.itemQuantity
+                .entrySet()
+                .stream()
+                .map(i -> new InventoryItem(i.getKey(), i.getValue()))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -68,7 +79,7 @@ public class OrderCreatedEvent {
                 "orderId='" + orderId + '\'' +
                 ", customerId='" + customerId + '\'' +
                 ", amount=" + amount +
-                ", itemIds=" + itemIds +
+                ", itemIds=" + itemQuantity +
                 '}';
     }
 }
