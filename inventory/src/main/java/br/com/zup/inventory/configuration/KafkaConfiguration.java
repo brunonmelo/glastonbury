@@ -1,6 +1,7 @@
 package br.com.zup.inventory.configuration;
 
 import br.com.zup.inventory.event.OrderEvent;
+import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -60,4 +61,10 @@ public class KafkaConfiguration {
         factory.setConsumerFactory(consumerFactory());
         return factory;
     }
+
+    @Bean
+    public NewTopic successOrder() {
+        return new NewTopic("book-order", 1, (short) 1);
+    }
+
 }

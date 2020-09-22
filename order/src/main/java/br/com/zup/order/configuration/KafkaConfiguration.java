@@ -33,22 +33,6 @@ public class KafkaConfiguration {
     }
 
     @Bean
-    public NewTopic createOrder() {
-        return new NewTopic("created-orders", 1, (short) 1);
-    }
-
-    @Bean
-    public NewTopic successOrder() {
-        return new NewTopic("inventory-order-success", 1, (short) 1);
-    }
-
-    @Bean
-    public NewTopic failOrder() {
-        return new NewTopic("inventory-order-fail", 1, (short) 1);
-    }
-
-
-    @Bean
     public DefaultKafkaProducerFactory messageProducerFactory() {
 
         Map<String, Object> configProps = new HashMap<>();
@@ -82,4 +66,20 @@ public class KafkaConfiguration {
         factory.setConsumerFactory(consumerFactory());
         return factory;
     }
+
+    @Bean
+    public NewTopic createOrder() {
+        return new NewTopic("created-orders", 1, (short) 1);
+    }
+
+    @Bean
+    public NewTopic orderFail() {
+        return new NewTopic("order-fail", 1, (short) 1);
+    }
+
+    @Bean
+    public NewTopic orderSuccess() {
+        return new NewTopic("order-success", 1, (short) 1);
+    }
+
 }

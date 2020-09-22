@@ -38,7 +38,7 @@ public class InventoryServiceImpl implements InventoryService {
             orderType = "book-order";
         } catch (InventoryException e) {
             orderEvent = createInvalidOrderEvent(orderCreatedEvent);
-            orderType = "inventory-order-fail";
+            orderType = "order-fail";
         }
 
         template.send(orderType, orderEvent);
@@ -56,14 +56,13 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     private void validateEventItems(OrderCreatedEvent orderCreatedEvent) {
-        List<InventoryItem> inventoryItems = orderCreatedEvent
-                .getInventoryItems()
-                .stream()
-                .map(i -> repository.findById(i.getId()).orElseThrow(() -> new ItemNotFoundException("Item not found")))
-                .collect(Collectors.toList());
+//        List<InventoryItem> inventoryItems = orderCreatedEvent
+//                .getInventoryItems()
+//                .stream()
+//                .map(i -> repository.findById(i.getId()).orElseThrow(() -> new ItemNotFoundException("Item not found")))
+//                .collect(Collectors.toList());
 
-        long value = Math.round(Math.random());
-        boolean validated = value != 0;
-        if(!validated) throw new NotEnoughItemException("Not enough items available");
+        double random = Math.random();
+        if(random < 0.3) throw new NotEnoughItemException("Not enough items available");
     }
 }

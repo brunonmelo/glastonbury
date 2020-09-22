@@ -5,11 +5,11 @@ import br.com.zup.inventory.receiver.OrderReceiver;
 import br.com.zup.inventory.service.InventoryService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
-@Service
+@Component
 public class OrderReceiverImpl implements OrderReceiver {
 
     private final ObjectMapper objectMapper;

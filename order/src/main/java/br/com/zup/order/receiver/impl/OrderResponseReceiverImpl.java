@@ -5,11 +5,11 @@ import br.com.zup.order.receiver.OrderResponseReceiver;
 import br.com.zup.order.service.OrderService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
-@Service
+@Component
 public class OrderResponseReceiverImpl implements OrderResponseReceiver {
 
     private final ObjectMapper objectMapper;
@@ -20,7 +20,7 @@ public class OrderResponseReceiverImpl implements OrderResponseReceiver {
         this.orderService = orderService;
     }
 
-    @KafkaListener(topics = "inventory-order-success", groupId = "order-group-id")
+    @KafkaListener(topics = "order-success", groupId = "order-group-id")
     public void confirmOrder(String message) throws IOException {
         OrderEvent event = this.objectMapper.readValue(message, OrderEvent.class);
 
@@ -30,7 +30,7 @@ public class OrderResponseReceiverImpl implements OrderResponseReceiver {
         orderService.processSuccess(event);
     }
 
-    @KafkaListener(topics = "inventory-order-fail", groupId = "order-group-id")
+    @KafkaListener(topics = "order-fail", groupId = "order-group-id")
     public void cancelOrder(String message) throws IOException {
         OrderEvent event = this.objectMapper.readValue(message, OrderEvent.class);
 
